@@ -1,41 +1,43 @@
-// Retorno do Stripe Checkout: mostra uma página simples e redireciona para o app via deep link
-// divideai://pro/success ou divideai://pro/cancel
-
-Deno.serve(async (req) => {
+Deno.serve((req) => {
   const url = new URL(req.url);
-  const status = url.searchParams.get('status') ?? 'success';
-  const deepLink = `divideai://pro/${status}`;
+  const redirect = url.searchParams.get('redirect');
+  
+  if (!redirect) {
+    return new Response('Missing redirect parameter', { status: 400 });
+  }
 
-  const html = `<!doctype html>
-<html lang="pt-BR">
-  <head>
-    <meta charset="utf-8" />
-    <title>DivideAI – Checkout</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <style>
-      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; padding: 24px; color: #2F2F2F; }
-      a { color: #FF6B6B; }
-      .card { max-width: 600px; margin: 0 auto; background: #FAFAFA; padding: 20px; border-radius: 12px; }
-      .btn { display: inline-block; margin-top: 12px; background: #FF6B6B; color: #FFF; padding: 10px 16px; border-radius: 8px; text-decoration: none; }
-    </style>
-    <script>
-      // Tenta redirecionar automaticamente para o app
-      setTimeout(function() { window.location.href = "${deepLink}"; }, 300);
-    </script>
-  </head>
-  <body>
-    <div class="card">
-      <h1>Checkout ${status === 'success' ? 'concluído' : 'cancelado'}</h1>
-      <p>${status === 'success'
-        ? 'Obrigado! Vamos te levar de volta ao app.'
-        : 'Você cancelou o checkout. Volte ao app para tentar novamente.'}</p>
-      <a class="btn" href="${deepLink}">Voltar para o app</a>
-    </div>
-  </body>
+  const decodedRedirect = decodeURIComponent(redirect);
+  
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Redirecionando...</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: system-ui; text-align: center; padding: 20px; }
+    .btn { display: inline-block; background: #FF6B6B; color: white; text-decoration: none; padding: 12px 24px; border-radius: 8px; margin-top: 20px; }
+  </style>
+  <script>
+    function openApp() {
+      window.location.href = "${decodedRedirect}";
+      setTimeout(function() {
+        // Se não abriu o app em 2 segundos, mostra o botão
+        document.getElementById('manual').style.display = 'block';
+      }, 2000);
+    }
+  </script>
+</head>
+<body onload="openApp()">
+  <h2>Redirecionando para o app...</h2>
+  <div id="manual" style="display: none">
+    <p>Se o app não abrir automaticamente:</p>
+    <a class="btn" href="${decodedRedirect}">Abrir App</a>
+  </div>
+</body>
 </html>`;
 
   return new Response(html, {
-    status: 200,
-    headers: { 'content-type': 'text/html; charset=utf-8' },
+    headers: { 'Content-Type': 'text/html; charset=utf-8' }
   });
 });

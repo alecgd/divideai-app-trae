@@ -55,19 +55,38 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const session = await stripe.checkout.sessions.create({
+    console.log('Criando sessão com:', {
       mode,
       success_url: APP_SUCCESS_URL,
       cancel_url: APP_CANCEL_URL,
+      price_id: STRIPE_PRICE_ID,
+      user_id: user.id,
+      email: user.email
+    });
+
+    const session = await stripe.checkout.sessions.create({
+      mode,
+      success_url: 'https://alexandrecgduarte.github.io/divideai-app-trae/success.html',
+      cancel_url: 'https://alexandrecgduarte.github.io/divideai-app-trae/cancel.html',
       line_items: [{ price: STRIPE_PRICE_ID, quantity: 1 }],
       client_reference_id: user.id,
       customer_email: user.email ?? undefined,
       metadata: { user_id: user.id },
       ui_mode: 'hosted',
       payment_method_types: ['card'],
+    }).catch(error => {
+      console.error('Erro ao criar sessão:', error);
+      throw error;
     });
 
-    const cleanSessionUrl = sanitize(session.url ?? '');
+    console.log('Sessão criada:', {
+      id: session.id,
+      url: session.url,
+      status: session.status
+    });
+
+    // Remove todas as crases e espaços da URL
+    const cleanSessionUrl = (session.url ?? '').replace(/[`\s]/g, '');
 
     // Sobrescreve campos do objeto session para evitar ambiguidade nos logs do app
     const sessionCleaned = {
