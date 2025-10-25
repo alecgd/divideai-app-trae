@@ -8,13 +8,25 @@
         body { font-family: system-ui; text-align: center; padding: 20px; }
         .btn { display: inline-block; background: #FF6B6B; color: white; text-decoration: none; padding: 12px 24px; border-radius: 8px; margin-top: 20px; }
     </style>
-    <script>
-        window.location.href = "divideai://pro/success";
-    </script>
 </head>
 <body>
     <h2>Assinatura Concluída!</h2>
     <p>Redirecionando para o app...</p>
     <a class="btn" href="divideai://pro/success">Voltar ao App</a>
+    <script>
+        // Tenta o redirecionamento de várias formas
+        function tryRedirect() {
+            // Tenta abrir o app
+            window.location.href = "divideai://pro/success";
+            
+            // Se não abrir em 1 segundo, tenta de outra forma
+            setTimeout(function() {
+                window.location.replace("divideai://pro/success");
+            }, 1000);
+        }
+        
+        // Inicia o redirecionamento quando a página carregar
+        window.onload = tryRedirect;
+    </script>
 </body>
 </html>

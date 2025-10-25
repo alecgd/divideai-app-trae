@@ -66,8 +66,8 @@ Deno.serve(async (req: Request) => {
 
     const session = await stripe.checkout.sessions.create({
       mode,
-      success_url: 'https://alexandrecgduarte.github.io/divideai-app-trae/success.html',
-      cancel_url: 'https://alexandrecgduarte.github.io/divideai-app-trae/cancel.html',
+      success_url: 'https://alecgd.github.io/divideai-app-trae/success.html',
+      cancel_url: 'https://alecgd.github.io/divideai-app-trae/cancel.html',
       line_items: [{ price: STRIPE_PRICE_ID, quantity: 1 }],
       client_reference_id: user.id,
       customer_email: user.email ?? undefined,
