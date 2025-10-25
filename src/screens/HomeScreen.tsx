@@ -1,11 +1,29 @@
-import React from 'react';
-import { View, Text, Button } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import React, { useEffect } from 'react';
+import { View, Text, Button, Linking } from 'react-native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useUserPlan } from '../hooks/useUserPlan';
 
 export default function HomeScreen() {
   const nav = useNavigation<any>();
-  const { isPro, loading } = useUserPlan();
+  const { isPro, loading, refresh } = useUserPlan();
+
+  // Atualiza plano ao focar na tela (retorno do Checkout)
+  useFocusEffect(
+    React.useCallback(() => {
+      refresh();
+      // sem dependências, para não disparar em loop
+    }, [])
+  );
+
+  // Opcional: também atualiza ao receber deep link divideai://pro/...
+  useEffect(() => {
+    const sub = Linking.addEventListener('url', () => {
+      refresh();
+    });
+    return () => {
+      sub.remove();
+    };
+  }, [refresh]);
 
   return (
     <View style={{ flex: 1, padding: 16 }}>
@@ -19,7 +37,11 @@ export default function HomeScreen() {
       {!loading && !isPro && (
         <View style={{ marginTop: 16, backgroundColor: '#FFF1EF', padding: 12, borderRadius: 8 }}>
           <Text style={{ color: '#2F2F2F' }}>Conheça a versão Pro</Text>
-          <Button title="Saiba Mais" onPress={() => { /* navegar para Plano Pro */ }} color="#FF6B6B" />
+          <Button
+            title="Saiba Mais"
+            onPress={() => nav.getParent()?.navigate('PlanoPro')}
+            color="#FF6B6B"
+          />
         </View>
       )}
 

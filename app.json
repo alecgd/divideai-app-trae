@@ -3,9 +3,6 @@
     "name": "DivideAI",
     "slug": "divideai-app-trae",
     "version": "1.0.0",
-    "scheme": "divideai",
-    "orientation": "portrait",
-    "platforms": ["ios", "android"],
-    "userInterfaceStyle": "automatic"
+    "scheme": "divideai"
   }
 }
