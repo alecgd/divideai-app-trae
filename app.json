@@ -3,6 +3,34 @@
     "name": "DivideAI",
     "slug": "divideai-app-trae",
     "version": "1.0.0",
-    "scheme": "divideai"
+    "scheme": "divideai",
+    "android": {
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "divideai",
+              "host": "pro",
+              "pathPrefix": "/"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ]
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.alecgd.divideai"
+    },
+    "android": {
+      "package": "com.alecgd.divideai",
+      "adaptiveIcon": {
+        "backgroundColor": "#ffffff"
+      }
+    }
   }
 }
