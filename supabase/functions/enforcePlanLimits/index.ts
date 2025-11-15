@@ -4,13 +4,24 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const LIMIT_FREE = 10;
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Content-Type': 'application/json',
+};
+
 Deno.serve(async (req) => {
   try {
+    if (req.method === 'OPTIONS') {
+      return new Response('ok', { headers: corsHeaders });
+    }
+
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
     const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: corsHeaders });
     }
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -20,7 +31,7 @@ Deno.serve(async (req) => {
     // Usuário autenticado via JWT
     const { data: userData, error: userError } = await supabase.auth.getUser();
     if (userError || !userData?.user?.id) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: corsHeaders });
     }
     const userId = userData.user.id;
 
@@ -36,7 +47,7 @@ Deno.serve(async (req) => {
     const isPro = plano === 'pro' && (!exp || exp.getTime() > Date.now());
 
     if (isPro) {
-      return new Response(JSON.stringify({ allowed: true, used: 0, limit: 'unlimited' }), { status: 200 });
+      return new Response(JSON.stringify({ allowed: true, used: 0, limit: 'unlimited' }), { status: 200, headers: corsHeaders });
     }
 
     // Contagem de divisões do mês atual
@@ -54,13 +65,13 @@ Deno.serve(async (req) => {
       .lt('created_at', end.toISOString());
 
     if (countError) {
-      return new Response(JSON.stringify({ error: 'Count failed' }), { status: 500 });
+      return new Response(JSON.stringify({ error: 'Count failed' }), { status: 500, headers: corsHeaders });
     }
 
     const used = count ?? 0;
     const allowed = used < LIMIT_FREE;
-    return new Response(JSON.stringify({ allowed, used, limit: LIMIT_FREE }), { status: 200 });
+    return new Response(JSON.stringify({ allowed, used, limit: LIMIT_FREE }), { status: 200, headers: corsHeaders });
   } catch (e) {
-    return new Response(JSON.stringify({ error: 'Server error', detail: String(e) }), { status: 500 });
+    return new Response(JSON.stringify({ error: 'Server error', detail: String(e) }), { status: 500, headers: corsHeaders });
   }
 });

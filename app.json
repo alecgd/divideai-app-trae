@@ -4,7 +4,21 @@
     "slug": "divideai-app-trae",
     "version": "1.0.0",
     "scheme": "divideai",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.alecgd.divideai",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Permitir acesso à câmera para tirar fotos de comprovantes.",
+        "NSPhotoLibraryUsageDescription": "Permitir acesso à biblioteca para selecionar imagens de comprovantes."
+      }
+    },
     "android": {
+      "package": "com.alecgd.divideai",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "backgroundColor": "#ffffff"
+      },
       "intentFilters": [
         {
           "action": "VIEW",
@@ -21,16 +35,6 @@
           ]
         }
       ]
-    },
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.alecgd.divideai"
-    },
-    "android": {
-      "package": "com.alecgd.divideai",
-      "adaptiveIcon": {
-        "backgroundColor": "#ffffff"
-      }
     }
   }
 }

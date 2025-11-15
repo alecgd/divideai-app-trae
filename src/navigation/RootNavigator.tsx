@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AppTabs from './AppTabs';
 import NewDivisionEqualScreen from '../screens/NewDivisionEqualScreen';
 import DivisionDetailScreen from '../screens/DivisionDetailScreen';
+import NewDivisionItemsScreen from '../screens/NewDivisionItemsScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -14,6 +15,11 @@ export default function RootNavigator() {
         name="NovaDivisaoIgual"
         component={NewDivisionEqualScreen}
         options={{ title: 'Nova Divisão – Igualitária' }}
+      />
+      <Stack.Screen
+        name="NovaDivisaoItens"
+        component={NewDivisionItemsScreen}
+        options={{ title: 'Nova Divisão – Por Itens' }}
       />
       <Stack.Screen
         name="DetalheDivisao"

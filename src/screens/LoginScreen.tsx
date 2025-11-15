@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, Alert } from 'react-native';
+import { View, Text, TextInput, Button } from 'react-native';
+import Snackbar from '../components/Snackbar';
 import { supabase } from '../lib/supabaseClient';
 
 export default function LoginScreen() {
@@ -7,15 +8,17 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string>('');
 
   async function handleLogin() {
     try {
       setLoading(true);
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
-        Alert.alert('Erro ao entrar', error.message);
+        setErrorMsg(error.message || 'Erro ao entrar');
       } else {
         // sessão será aplicada automaticamente e App renderiza as abas
+        setErrorMsg('');
       }
     } finally {
       setLoading(false);
@@ -27,10 +30,10 @@ export default function LoginScreen() {
       setLoading(true);
       const { data, error } = await supabase.auth.signUp({ email, password });
       if (error) {
-        Alert.alert('Erro no cadastro', error.message);
+        setErrorMsg(error.message || 'Erro no cadastro');
       } else if (data.user) {
-        Alert.alert('Cadastro criado', 'Verifique seu e-mail (se necessário) e faça login.');
         setMode('login');
+        setErrorMsg('');
       }
     } finally {
       setLoading(false);
@@ -49,14 +52,17 @@ export default function LoginScreen() {
         keyboardType="email-address"
         value={email}
         onChangeText={setEmail}
-        style={{ borderWidth: 1, borderColor: '#DDD', borderRadius: 8, padding: 12, marginBottom: 12 }}
+        style={{ borderWidth: 1, borderColor: errorMsg ? '#FF6B6B' : '#DDD', borderRadius: 8, padding: 12, marginBottom: 4 }}
       />
+      {errorMsg ? (
+        <Text style={{ color: '#FF6B6B', marginBottom: 8 }}>{errorMsg}</Text>
+      ) : null}
       <TextInput
         placeholder="Senha"
         secureTextEntry
         value={password}
         onChangeText={setPassword}
-        style={{ borderWidth: 1, borderColor: '#DDD', borderRadius: 8, padding: 12, marginBottom: 16 }}
+        style={{ borderWidth: 1, borderColor: errorMsg ? '#FF6B6B' : '#DDD', borderRadius: 8, padding: 12, marginBottom: 16 }}
       />
 
       {mode === 'login' ? (
@@ -82,6 +88,7 @@ export default function LoginScreen() {
           </Text>
         )}
       </View>
+      <Snackbar visible={!!errorMsg} message={errorMsg} onDismiss={() => setErrorMsg('')} />
     </View>
   );
 }

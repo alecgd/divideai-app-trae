@@ -1,95 +1,59 @@
 import React, { useState } from 'react';
-import { View, Text, Button, Alert, ActivityIndicator, Linking } from 'react-native';
+import { View, Text, Button, Alert } from 'react-native';
 import { supabase } from '../lib/supabaseClient';
 
 export default function ProPlanScreen() {
   const [loading, setLoading] = useState(false);
+  // Billing será implementado depois
 
   async function handleCheckout() {
     try {
       setLoading(true);
       const { data: sessionData } = await supabase.auth.getSession();
-      const accessToken = sessionData.session?.access_token;
-      if (!accessToken) {
+      if (!sessionData.session) {
         Alert.alert('Faça login', 'Você precisa estar logado para assinar o Pro.');
         return;
       }
 
-      try {
-        const { data: urlCheck, error: urlError } = await supabase.functions.invoke('checkUrls', {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        });
-        
-        console.log('URL Check Response:', { data: urlCheck, error: urlError });
-        
-        if (urlError) {
-          Alert.alert(
-            'Erro no Check',
-            'Erro: ' + JSON.stringify(urlError, null, 2),
-            [{ text: 'OK', onPress: () => setLoading(false) }],
-            { cancelable: false }
-          );
-          return;
-        }
-        
-        // Primeiro Alert com os dados
-        await new Promise((resolve) => {
-          Alert.alert(
-            'Valores dos Secrets',
-            JSON.stringify(urlCheck, null, 2),
-            [{ text: 'OK', onPress: resolve }],
-            { cancelable: false }
-          );
-        });
-      } catch (e) {
-        Alert.alert('Erro inesperado', 
-          'Erro: ' + JSON.stringify(e, null, 2)
-        );
-        setLoading(false);
-        return;
-      }
+      // Inicia a compra
+      const purchase = await RNBilling.purchase(SUBSCRIPTION_ID);
+      
+      // Confirma a compra com o Google
+      await RNBilling.acknowledgePurchase(purchase.purchaseToken);
+      
+      // Atualiza o plano no Supabase
+      const { error } = await supabase
+        .from('users')
+        .update({ 
+          plano: 'pro',
+          play_store_token: purchase.purchaseToken,
+          play_store_product_id: SUBSCRIPTION_ID
+        })
+        .eq('id', sessionData.session.user.id);
 
-      console.log('Iniciando checkout...');
-      const { data, error } = await supabase.functions.invoke('createCheckoutSession', {
-        body: { mode: 'subscription' },
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      
-      console.log('Resposta do checkout:', { data, error });
-      
       if (error) {
+        console.error('Erro ao atualizar plano:', error);
         Alert.alert(
-          'Erro ao iniciar checkout',
-          `Erro: ${JSON.stringify(error, null, 2)}\n\nDados: ${JSON.stringify(data, null, 2)}`
+          'Erro ao ativar plano',
+          'A compra foi realizada mas houve um erro ao ativar o plano. Entre em contato com o suporte.'
         );
         return;
       }
 
-      // Parse a resposta se vier como string
-      const responseData = typeof data === 'string' ? JSON.parse(data) : data;
-      console.log('Dados parseados:', responseData);
-
-      const rawUrl = responseData?.url ?? responseData?.session?.url;
-      console.log('URL bruta:', rawUrl);
-
-      // Limpa TODAS as crases e espaços da URL
-      const cleanUrl = typeof rawUrl === 'string'
-        ? rawUrl.replace(/[`\s]/g, '')
-        : undefined;
-      
-      console.log('URL após limpeza:', cleanUrl);
-
-      if (!cleanUrl) {
-        Alert.alert(
-          'Sessão sem URL',
-          `Session ID: ${sid ?? 'n/a'}.\nCheque os logs do Stripe com esse ID.`
-        );
+      Alert.alert(
+        'Sucesso!', 
+        'Assinatura Pro ativada com sucesso! Aproveite todos os recursos.'
+      );
+    } catch (err: any) {
+      console.error('Erro na compra:', err);
+      if (err.code === 1) {
+        // Usuário cancelou
         return;
       }
-
-      await Linking.openURL(cleanUrl);
-    } catch (e: any) {
-      Alert.alert('Erro inesperado', e.message ?? 'Falha ao abrir checkout');
+      Alert.alert(
+        'Erro na assinatura', 
+        'Não foi possível completar a compra. Tente novamente mais tarde.'
+      );
     } finally {
       setLoading(false);
     }
@@ -107,16 +71,27 @@ export default function ProPlanScreen() {
         • Suporte prioritário e mais conveniências
       </Text>
 
+      {products.length > 0 && (
+        <Text style={{ marginTop: 12, fontSize: 18, color: '#2F2F2F' }}>
+          {products[0].localizedPrice}/mês
+        </Text>
+      )}
+
       <View style={{ marginTop: 24 }}>
         {loading ? (
           <ActivityIndicator />
         ) : (
-          <Button title="Assinar Pro" onPress={handleCheckout} color="#FF6B6B" />
+          <Button 
+            title={products.length > 0 ? `Assinar Pro - ${products[0].localizedPrice}/mês` : 'Assinar Pro'}
+            onPress={handleCheckout} 
+            color="#FF6B6B" 
+          />
         )}
       </View>
 
       <Text style={{ marginTop: 16, color: '#666' }}>
-        O pagamento é processado via Stripe (ambiente de testes).
+        Assinatura renovada automaticamente através da Google Play Store.
+        Cancele a qualquer momento pela Play Store.
       </Text>
     </View>
   );

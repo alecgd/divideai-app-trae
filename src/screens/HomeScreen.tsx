@@ -52,6 +52,14 @@ export default function HomeScreen() {
           color="#FF6B6B"
         />
       </View>
+
+      <View style={{ marginTop: 12 }}>
+        <Button
+          title="Nova Divisão por Itens"
+          onPress={() => nav.navigate('NovaDivisaoItens')}
+          color="#45B7D1"
+        />
+      </View>
     </View>
   );
 }

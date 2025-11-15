@@ -5,17 +5,20 @@ import { supabase } from './src/lib/supabaseClient';
 import LoginScreen from './src/screens/LoginScreen';
 import RootNavigator from './src/navigation/RootNavigator';
 import { Linking } from 'react-native';
+import RNBilling from 'react-native-billing';
 
 export default function App() {
   const [session, setSession] = useState<Session | null>(null);
 
   useEffect(() => {
+    // Inicializa autenticação
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session ?? null);
     });
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, newSession) => {
       setSession(newSession ?? null);
     });
+
     return () => {
       authListener.subscription.unsubscribe();
     };
