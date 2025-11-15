@@ -1,0 +1,10 @@
+{
+  "build": {
+    "outputDirectory": "dist"
+  },
+  "rewrites": [
+    { "source": "/_expo/:path*", "destination": "/_expo/:path*" },
+    { "source": "/assets/:path*", "destination": "/assets/:path*" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
