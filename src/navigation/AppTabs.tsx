@@ -1,5 +1,6 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { theme } from '../theme';
 import HomeScreen from '../screens/HomeScreen';
 import HistoryScreen from '../screens/HistoryScreen';
 import FriendsScreen from '../screens/FriendsScreen';
@@ -12,8 +13,8 @@ export default function AppTabs() {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#FF6B6B',
-        tabBarInactiveTintColor: '#2F2F2F',
+        tabBarActiveTintColor: theme.colors.primary,
+        tabBarInactiveTintColor: theme.colors.textSecondary,
       }}
     >
       <Tab.Screen name="Início" component={HomeScreen} />

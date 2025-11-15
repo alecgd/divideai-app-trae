@@ -1,5 +1,7 @@
 import React, { useEffect } from 'react';
 import { View, Text, Button, Linking } from 'react-native';
+import BrandHeader from '../components/BrandHeader';
+import { theme } from '../theme';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useUserPlan } from '../hooks/useUserPlan';
 
@@ -26,39 +28,42 @@ export default function HomeScreen() {
   }, [refresh]);
 
   return (
-    <View style={{ flex: 1, padding: 16 }}>
-      <Text style={{ fontSize: 24, fontWeight: '600', color: '#2F2F2F' }}>
-        Olá! 👋
-      </Text>
-      <Text style={{ marginTop: 8, color: '#2F2F2F' }}>
-        Vamos dividir uma conta hoje?
-      </Text>
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+      <BrandHeader />
+      <View style={{ padding: theme.spacing.lg }}>
+        <Text style={{ ...theme.typography.h1, color: theme.colors.textPrimary }}>
+          Olá! 👋
+        </Text>
+        <Text style={{ marginTop: theme.spacing.sm, color: theme.colors.textSecondary }}>
+          Vamos dividir uma conta hoje?
+        </Text>
 
       {!loading && !isPro && (
-        <View style={{ marginTop: 16, backgroundColor: '#FFF1EF', padding: 12, borderRadius: 8 }}>
-          <Text style={{ color: '#2F2F2F' }}>Conheça a versão Pro</Text>
+        <View style={{ marginTop: theme.spacing.lg, backgroundColor: '#2A1B1B', padding: theme.spacing.md, borderRadius: theme.radii.md }}>
+          <Text style={{ color: theme.colors.textPrimary }}>Conheça a versão Pro</Text>
           <Button
             title="Saiba Mais"
             onPress={() => nav.getParent()?.navigate('PlanoPro')}
-            color="#FF6B6B"
+            color={theme.colors.primary}
           />
         </View>
       )}
 
-      <View style={{ marginTop: 16 }}>
+      <View style={{ marginTop: theme.spacing.lg }}>
         <Button
           title="Nova Divisão"
           onPress={() => nav.navigate('NovaDivisaoIgual')}
-          color="#FF6B6B"
+          color={theme.colors.primary}
         />
       </View>
 
-      <View style={{ marginTop: 12 }}>
+      <View style={{ marginTop: theme.spacing.md }}>
         <Button
           title="Nova Divisão por Itens"
           onPress={() => nav.navigate('NovaDivisaoItens')}
-          color="#45B7D1"
+          color={theme.colors.secondary}
         />
+      </View>
       </View>
     </View>
   );
